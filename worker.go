@@ -53,7 +53,7 @@ func CreateWorker(cfg Config) *Worker {
 		if (cfg.Type && lSet.Contains(m[i].targetId)) ||
 			(!cfg.Type && !lSet.Contains(m[i].targetId)) {
 			count := m[i].limit - m[i].todayFeed
-			if m[i].level < 20 && count > 0 {
+			if m[i].level < 20 && count != 0 {
 				medals = append(medals, m[i])
 				hc := count / 100 * 5
 				if count > b.HeartCount {

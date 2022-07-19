@@ -6,13 +6,16 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 )
 
 const version = "0.1.0"
 
 func main() {
 	log.Printf("version: %s\n", version)
-	file, err := os.Open("config.yaml")
+	configPath := filepath.Dir(os.Args[0]) + "/config.yaml"
+	log.Printf("使用配置文件：%s\n", configPath)
+	file, err := os.Open(configPath)
 	if err != nil {
 		log.Fatalln(err)
 	}
