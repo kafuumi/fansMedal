@@ -57,15 +57,15 @@ func CreateWorker(cfg Config) *Worker {
 		}
 
 		count := m[i].limit - m[i].todayFeed
-		if m[i].level < 20 && count != 0 {
+		if m[i].level < 20 && count > 0 {
 			medals = append(medals, m[i])
 			hc := count / 100 * 5
 			if count > b.HeartCount {
 				b.HeartCount = hc + 1
 			}
-			logger.Printf("粉丝牌：%s level=%d, count=%d 加入任务队列\n", m[i].name, m[i].level, count)
+			logger.Printf("[加入]粉丝牌：%s level=%d, count=%d\n", m[i].name, m[i].level, count)
 		} else {
-			logger.Printf("粉丝牌：%s level=%d, count=%d 不加入任务队列", m[i].name, m[i].level, count)
+			logger.Printf("[不加入]粉丝牌：%s level=%d, count=%d", m[i].name, m[i].level, count)
 		}
 	}
 	wCfg := workerConfig{
