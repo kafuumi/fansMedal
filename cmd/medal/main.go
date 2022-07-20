@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-const version = "0.1.0"
+const version = "0.1.2"
 
 func main() {
 	log.Printf("version: %s\n", version)
@@ -30,7 +30,7 @@ func main() {
 		return
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	exit := make(chan struct{}, 1)
+	exit := make(chan struct{}, 2)
 	worker.Start(ctx, exit)
 	go func() {
 		e := make(chan os.Signal)

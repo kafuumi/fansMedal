@@ -58,6 +58,7 @@ type Medal struct {
 	targetId   int64  //主播uid
 	anchorName string //主播昵称
 	name       string //粉丝牌名称
+	isWear     bool   //当前是否佩戴该粉丝牌
 }
 
 func NewBili(key string, count int) *Bili {
@@ -152,6 +153,7 @@ func (b *Bili) GetMedals() ([]Medal, error) {
 		medal.targetId = medalInfo.Get("target_id").Int()
 		medal.anchorName = anchorInfo.Get("nick_name").String()
 		medal.name = medalInfo.Get("medal_name").String()
+		medal.isWear = medalInfo.Get("wearing_status").Int() == 1
 
 		set.Add(medal.medalId)
 		medals = append(medals, medal)

@@ -90,6 +90,12 @@ func TestBili_GetMedals(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, medals)
 	t.Logf("获取到粉丝牌数量：%d", len(medals))
+	for i := range medals {
+		if medals[i].isWear {
+			log.Printf("当前佩戴的粉丝牌：%s", medals[i].name)
+			break
+		}
+	}
 }
 
 //佩戴粉丝牌

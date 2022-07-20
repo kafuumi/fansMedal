@@ -110,20 +110,27 @@ func (w *Worker) DoLike(ctx context.Context) {
 
 func (w *Worker) DoChat(ctx context.Context) {
 	i := 0
+	lastMedal := 0 //任务开始前佩戴的粉丝牌
 	do(ctx, time.Duration(w.chatCD)*time.Second, func(now time.Time) bool {
 		var m Medal
 		m, i = w.medals[i], i+1
 		if w.isWear {
 			err := w.bili.WearMedal(m.medalId)
 			logError(err, "佩戴粉丝牌：%s 失败", m.name)
+			if m.isWear {
+				lastMedal = m.medalId
+			}
 		}
-		err := w.bili.SendChat(m.roomId, "可爱捏 啵啵")
+		err := w.bili.SendChat(m.roomId, "可爱捏,啵啵~")
 		logError(err, "发送弹幕失败：name=%s", m.name)
 		if i >= len(w.medals) {
 			return false
 		}
 		return true
 	})
+	if lastMedal != 0 {
+		_ = w.bili.WearMedal(lastMedal)
+	}
 	logger.Println("弹幕任务完成")
 }
 
