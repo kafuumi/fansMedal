@@ -152,6 +152,8 @@ func (w *Worker) ShowLive(ctx context.Context) {
 			err := w.bili.Heartbeat(ctx, m.roomId, m.targetId)
 			logError(err, "发送心跳包失败：name=%s", m.name)
 		}(w.medals[i])
+		//加个延时，避免心跳包同时发送
+		time.Sleep(500 * time.Millisecond)
 	}
 	wg.Wait()
 }
