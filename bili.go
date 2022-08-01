@@ -61,6 +61,22 @@ type Medal struct {
 	isWear     bool   //当前是否佩戴该粉丝牌
 }
 
+func (m Medal) Level() int {
+	return m.level
+}
+
+func (m Medal) TargetId() int64 {
+	return m.targetId
+}
+
+func (m Medal) AnchorName() string {
+	return m.anchorName
+}
+
+func (m Medal) Name() string {
+	return m.name
+}
+
 func NewBili(key string, count int) *Bili {
 	return &Bili{
 		u:          User{accessKey: key},

@@ -19,17 +19,10 @@ type workerConfig struct {
 }
 
 type Worker struct {
-	medals []Medal //需要处理的粉丝牌任务
-	bili   *Bili
+	medals   []Medal //需要处理的粉丝牌任务
+	bili     *Bili
+	lastWear int //任务开始前佩戴的粉丝牌子id
 	workerConfig
-}
-
-func NewWorker(medal []Medal, b *Bili, cfg workerConfig) *Worker {
-	return &Worker{
-		medals:       medal,
-		bili:         b,
-		workerConfig: cfg,
-	}
 }
 
 func CreateWorker(cfg Config) *Worker {
@@ -49,7 +42,11 @@ func CreateWorker(cfg Config) *Worker {
 	lSet.Add(cfg.List...)
 
 	medals := make([]Medal, 0)
+	lastWear := 0
 	for i := range m {
+		if m[i].isWear {
+			lastWear = m[i].medalId
+		}
 		if cfg.Type && !lSet.Contains(m[i].targetId) {
 			continue
 		} else if !cfg.Type && lSet.Contains(m[i].targetId) {
@@ -57,7 +54,7 @@ func CreateWorker(cfg Config) *Worker {
 		}
 
 		count := m[i].limit - m[i].todayFeed
-		if m[i].level < 20 && count > 0 {
+		if count > 0 {
 			medals = append(medals, m[i])
 			hc := count / 100 * 5
 			if count > b.HeartCount {
@@ -73,7 +70,12 @@ func CreateWorker(cfg Config) *Worker {
 		chatCD: cfg.ChatCD,
 		isWear: cfg.IsWear,
 	}
-	return NewWorker(medals, b, wCfg)
+	return &Worker{
+		medals:       medals,
+		bili:         b,
+		workerConfig: wCfg,
+		lastWear:     lastWear,
+	}
 }
 
 func logError(err error, msg string, args ...interface{}) {
@@ -115,16 +117,13 @@ func (w *Worker) DoLike(ctx context.Context) {
 
 func (w *Worker) DoChat(ctx context.Context) {
 	i := 0
-	lastMedal := 0 //任务开始前佩戴的粉丝牌
+	lastMedal := w.lastWear //任务开始前佩戴的粉丝牌
 	do(ctx, time.Duration(w.chatCD)*time.Second, func(now time.Time) bool {
 		var m Medal
 		m, i = w.medals[i], i+1
 		if w.isWear {
 			err := w.bili.WearMedal(m.medalId)
 			logError(err, "佩戴粉丝牌：%s 失败", m.name)
-			if m.isWear {
-				lastMedal = m.medalId
-			}
 		}
 		err := w.bili.SendChat(m.roomId, "可爱捏,啵啵~")
 		logError(err, "发送弹幕失败：name=%s", m.name)
@@ -142,6 +141,11 @@ func (w *Worker) DoChat(ctx context.Context) {
 func (w *Worker) ShowLive(ctx context.Context) {
 	var wg sync.WaitGroup
 	for i := range w.medals {
+		if w.medals[i].level >= 20 {
+			//20级以上牌子不处理
+			logger.Printf("跳过: %s[%d]", w.medals[i].name, w.medals[i].level)
+			continue
+		}
 		wg.Add(1)
 		go func(m Medal) {
 			defer wg.Done()
