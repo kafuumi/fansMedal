@@ -34,6 +34,7 @@ const (
 
 var (
 	ErrInvalidKey = errors.New("无效的access key")
+	ErrShield     = errors.New("code=0, msg=弹幕被屏蔽")
 )
 
 type User struct {
@@ -240,8 +241,16 @@ func (b *Bili) SendChat(id int, msg string) error {
 	body.Add("rnd", tsStr())
 	body.Add("color", "16777215")
 	body.Add("fontsize", "25")
-	_, err := b.helpResp(b.r.Post(sendChatApi, param, strings.NewReader(body.Encode()),
-		E{"Content-Type", applicationForm}))
+	resp, err := b.r.Post(sendChatApi, param, strings.NewReader(body.Encode()),
+		E{"Content-Type", applicationForm})
+	_, err = b.helpResp(resp, err)
+	if err != nil {
+		return nil
+	}
+	if resp.Get("message").String() != "" {
+		//弹幕被屏蔽
+		return ErrShield
+	}
 	return err
 }
 

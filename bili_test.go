@@ -182,6 +182,7 @@ func TestBili_SendChat(t *testing.T) {
 		{"empty id", 0, "", false},
 		{"ban id", 11365, "早上好", false}, //被禁言的直播间
 		{"ok id", 22634198, "早上好", true},
+		{"shield", 22625025, "啵啵", false}, //屏蔽词
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

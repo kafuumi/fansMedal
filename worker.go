@@ -3,6 +3,7 @@ package fans
 import (
 	"context"
 	"log"
+	"math/rand"
 	"os"
 	"sync"
 	"time"
@@ -60,7 +61,7 @@ func CreateWorker(cfg Config) *Worker {
 			if count > b.HeartCount {
 				b.HeartCount = hc + 1
 			}
-			logger.Printf("[加入]粉丝牌：%s level=%d, count=%d\n", m[i].name, m[i].level, count)
+			logger.Printf("[加入]粉丝牌：%s level=%d, count=%d", m[i].name, m[i].level, count)
 		} else {
 			logger.Printf("[不加入]粉丝牌：%s level=%d, count=%d", m[i].name, m[i].level, count)
 		}
@@ -81,7 +82,7 @@ func CreateWorker(cfg Config) *Worker {
 func logError(err error, msg string, args ...interface{}) {
 	if err != nil {
 		logger.Printf(msg, args...)
-		logger.Printf(" %v\n", err)
+		logger.Printf(" %v", err)
 	}
 }
 
@@ -118,6 +119,15 @@ func (w *Worker) DoLike(ctx context.Context) {
 func (w *Worker) DoChat(ctx context.Context) {
 	i := 0
 	lastMedal := w.lastWear //任务开始前佩戴的粉丝牌
+	chats := []string{
+		"（*゜ー゜*）",
+		"(☆-ｖ-)",
+		"ヾ(•ω•`)o",
+		"QAQ",
+		"Orz",
+		"(*^▽^*)",
+		"(≧∇≦)ﾉ",
+	}
 	do(ctx, time.Duration(w.chatCD)*time.Second, func(now time.Time) bool {
 		var m Medal
 		m, i = w.medals[i], i+1
@@ -125,7 +135,9 @@ func (w *Worker) DoChat(ctx context.Context) {
 			err := w.bili.WearMedal(m.medalId)
 			logError(err, "佩戴粉丝牌：%s 失败", m.name)
 		}
-		err := w.bili.SendChat(m.roomId, "可爱捏,啵啵~")
+		msg := chats[rand.Intn(len(chats))]
+		err := w.bili.SendChat(m.roomId, msg)
+		logger.Printf("发送弹幕：%s %s", m.name, msg)
 		logError(err, "发送弹幕失败：name=%s", m.name)
 		if i >= len(w.medals) {
 			return false

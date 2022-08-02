@@ -1,12 +1,10 @@
 package fans
 
 import (
-	"context"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"os"
 	"testing"
-	"time"
 )
 
 func TestWorker_ShowLive(t *testing.T) {
@@ -16,10 +14,7 @@ func TestWorker_ShowLive(t *testing.T) {
 		return
 	}
 	bili = NewBili(accessKey, 10)
-	ms, err := bili.GetMedals()
+	_, err := bili.GetMedals()
 	assert.NoError(t, err)
-	w := NewWorker(ms, bili, workerConfig{})
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
-	defer cancel()
-	w.ShowLive(ctx)
+
 }
