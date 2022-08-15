@@ -34,6 +34,8 @@ func CreateWorker(cfg Config) *Worker {
 		return nil
 	}
 	logger.Printf("用户信息：%s", b.u.uname)
+	_, err = b.GetMedals()
+	time.Sleep(50 * time.Millisecond)
 	m, err := b.GetMedals()
 	if err != nil {
 		logError(err, "获取粉丝牌失败")
@@ -58,8 +60,9 @@ func CreateWorker(cfg Config) *Worker {
 		if count > 0 {
 			medals = append(medals, m[i])
 			hc := count / 100 * 5
-			if count > b.HeartCount {
-				b.HeartCount = hc + 1
+			//如果有上舰的牌子，这里hc会很大，导致程序一直无法结束
+			if hc <= 75 && hc > b.HeartCount {
+				b.HeartCount = hc
 			}
 			logger.Printf("[加入]粉丝牌：%s level=%d, count=%d", m[i].name, m[i].level, count)
 		} else {
@@ -123,9 +126,10 @@ func (w *Worker) DoChat(ctx context.Context) {
 		"（*゜ー゜*）",
 		"(☆-ｖ-)",
 		"ヾ(•ω•`)o",
-		"QAQ",
-		"Orz",
 		"(*^▽^*)",
+		"可爱捏",
+		"打卡",
+		"早上好",
 		"(≧∇≦)ﾉ",
 	}
 	do(ctx, time.Duration(w.chatCD)*time.Second, func(now time.Time) bool {
